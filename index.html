@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index — Track what you read</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>Index</h1>
+    <p class="tagline">Track what you read</p>
+    <button id="addBookBtn">+ Add Book</button>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="tabs">
+    <button data-tab="currently" class="tab active">Currently Reading</button>
+    <button data-tab="want_read" class="tab">Want to Read</button>
+    <button data-tab="read" class="tab">Read</button>
+    <button data-tab="want_buy" class="tab">Want to Buy</button>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    <section id="currently" class="tab-content active"></section>
+    <section id="want_read" class="tab-content"></section>
+    <section id="read" class="tab-content"></section>
+    <section id="want_buy" class="tab-content"></section>
+  </main>
+
+  <!-- Add / Edit Book Modal -->
+  <div id="bookModal" class="modal hidden">
+    <form id="bookForm">
+      <h2>Add Book</h2>
+
+      <label>
+        Title
+        <input type="text" id="title" required />
+      </label>
+
+      <label>
+        Author
+        <input type="text" id="author" required />
+      </label>
+
+      <label>
+        Status
+        <select id="status">
+          <option value="currently">Currently Reading</option>
+          <option value="want_read">Want to Read</option>
+          <option value="read">Read</option>
+          <option value="want_buy">Want to Buy</option>
+        </select>
+      </label>
+
+      <label>
+        Format
+        <select id="format">
+          <option value="ebook">eBook</option>
+          <option value="paperback">Paperback</option>
+        </select>
+      </label>
+
+      <label>
+        Date Started
+        <input type="date" id="dateStarted" />
+      </label>
+
+      <label>
+        Date Finished
+        <input type="date" id="dateFinished" />
+      </label>
+
+      <label>
+        Rating
+        <input type="number" min="1" max="5" id="rating" />
+      </label>
+
+      <label>
+        Notes
+        <textarea id="notes"></textarea>
+      </label>
+
+      <label>
+        Cover URL
+        <input type="url" id="cover" />
+      </label>
+
+      <div class="actions">
+        <button type="submit">Save</button>
+        <button type="button" id="cancelBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
