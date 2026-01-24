@@ -1,3 +1,5 @@
+let editingBookId = null;
+
 // ===== FORM INPUTS =====
 const title = document.getElementById("title");
 const author = document.getElementById("author");
@@ -39,6 +41,13 @@ function renderBooks() {
   });
 }
 
+// ===== DELETE LOGIC =====
+function deleteBook(id) {
+  const books = getBooks().filter(book => book.id !== id);
+  saveBooks(books);
+  renderBooks();
+}
+
 // ===== CREATE CARDS =====
 function createBookCard(book) {
   const card = document.createElement("div");
@@ -50,7 +59,21 @@ function createBookCard(book) {
     <small>${book.format}</small>
     ${book.dateStarted ? `<br><small>Started: ${book.dateStarted}</small>` : ""}
     ${book.dateFinished ? `<br><small>Finished: ${book.dateFinished}</small>` : ""}
+    <div class="card-actions">
+      <button data-id="${book.id}" class="edit-btn">Edit</button>
+      <button data-id="${book.id}" class="delete-btn">Delete</button>
+    </div>
   `;
+
+  // Edit
+  card.querySelector(".edit-btn").addEventListener("click", () => {
+    openEditModal(book);
+  });
+
+  // Delete
+  card.querySelector(".delete-btn").addEventListener("click", () => {
+    deleteBook(book.id);
+  });
 
   return card;
 }
@@ -98,30 +121,64 @@ cancelBtn.addEventListener("click", closeModal);
 function closeModal() {
   modal.classList.add("hidden");
   bookForm.reset();
+  editingBookId = null;
 }
 
 bookForm.addEventListener("submit", e => {
   e.preventDefault();
 
-  const newBook = {
-    id: crypto.randomUUID(),
-    title: title.value.trim(),
-    author: author.value.trim(),
-    status: status.value,
-    format: format.value,
-    rating: rating.value ? Number(rating.value) : null,
-    notes: notes.value,
-    cover: cover.value || null,
-    dateStarted: dateStarted.value || null,
-    dateFinished: dateFinished.value || null
-  };
-
   const books = getBooks();
-  books.push(newBook);
-  saveBooks(books);
 
+  if (editingBookId) {
+    // EDIT
+    const book = books.find(b => b.id === editingBookId);
+
+    book.title = title.value.trim();
+    book.author = author.value.trim();
+    book.status = status.value;
+    book.format = format.value;
+    book.rating = rating.value ? Number(rating.value) : null;
+    book.notes = notes.value;
+    book.cover = cover.value || null;
+    book.dateStarted = dateStarted.value || null;
+    book.dateFinished = dateFinished.value || null;
+
+    editingBookId = null;
+  } else {
+    // ADD
+    books.push({
+      id: crypto.randomUUID(),
+      title: title.value.trim(),
+      author: author.value.trim(),
+      status: status.value,
+      format: format.value,
+      rating: rating.value ? Number(rating.value) : null,
+      notes: notes.value,
+      cover: cover.value || null,
+      dateStarted: dateStarted.value || null,
+      dateFinished: dateFinished.value || null
+    });
+  }
+
+  saveBooks(books);
   renderBooks();
   closeModal();
 });
+
+function openEditModal(book) {
+  editingBookId = book.id;
+
+  title.value = book.title;
+  author.value = book.author;
+  status.value = book.status;
+  format.value = book.format;
+  rating.value = book.rating ?? "";
+  notes.value = book.notes;
+  cover.value = book.cover ?? "";
+  dateStarted.value = book.dateStarted ?? "";
+  dateFinished.value = book.dateFinished ?? "";
+
+  modal.classList.remove("hidden");
+}
 
 renderBooks();
