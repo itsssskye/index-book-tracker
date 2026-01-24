@@ -1,27 +1,36 @@
 // ===== FORM INPUTS =====
 const title = document.getElementById("title");
 const author = document.getElementById("author");
-const status = document.getElementById("status");
+const statusSelect = document.getElementById("status");
 const format = document.getElementById("format");
-const rating = document.getElementById("rating");
 const notes = document.getElementById("notes");
 const cover = document.getElementById("cover");
 const dateStarted = document.getElementById("dateStarted");
 const dateFinished = document.getElementById("dateFinished");
 
 let editingBookId = null;
-
 let selectedRating = null;
 
 const stars = document.querySelectorAll(".star-rating span");
 
+// Event Listeners
+dateStarted.addEventListener("change", enforceStatusRules);
+dateFinished.addEventListener("change", enforceStatusRules);
+statusSelect.addEventListener("change", enforceStatusRules);
+
 stars.forEach(star => {
-  star.addEventListener("click", () => {
-    selectedRating = Number(star.dataset.value);
-    stars.forEach(s =>
-      s.classList.toggle("active", Number(s.dataset.value) <= selectedRating)
-    );
-  });
+    star.addEventListener("click", () => {
+        selectedRating = Number(star.dataset.value);
+
+        stars.forEach(s =>
+        s.classList.toggle(
+            "active",
+            Number(s.dataset.value) <= selectedRating
+           )
+        );
+
+        enforceStatusRules();
+    });
 });
 
 // ===== STORAGE HELPERS =====
@@ -31,6 +40,48 @@ function getBooks() {
 
 function saveBooks(books) {
   localStorage.setItem("books", JSON.stringify(books));
+}
+
+// ==== STATUS HELPERS ====
+function enforceStatusRules() {
+  const options = Array.from(statusSelect.options);
+
+  // Reset: enable everything
+  options.forEach(opt => (opt.disabled = false));
+
+  // Finished date → READ ONLY
+  if (dateFinished.value) {
+    options.forEach(opt => {
+      if (opt.value !== "read") opt.disabled = true;
+    });
+    statusSelect.value = "read";
+    return;
+  }
+
+  // Rating exists → READ ONLY
+  if (selectedRating) {
+    options.forEach(opt => {
+      if (opt.value !== "read") opt.disabled = true;
+    });
+    statusSelect.value = "read";
+    return;
+  }
+
+  // Start date exists → CURRENTLY or READ
+  if (dateStarted.value) {
+    options.forEach(opt => {
+      if (!["currently", "read"].includes(opt.value)) {
+        opt.disabled = true;
+      }
+    });
+
+    if (!["currently", "read"].includes(statusSelect.value)) {
+      statusSelect.value = "currently";
+    }
+    return;
+  }
+
+  // No constraints → allow all
 }
 
 // ===== RENDERING =====
@@ -71,9 +122,14 @@ function createBookCard(book) {
     <em>${book.author}</em>
 
     <div class="book-meta">
-        <span>${book.format}</span>
-        ${book.dateStarted ? `<span>Started: ${book.dateStarted}</span>` : ""}
-        ${book.dateFinished ? `<span>Finished: ${book.dateFinished}</span>` : ""}
+      <span>${book.format}</span>
+      ${book.dateStarted ? `<span>Started: ${book.dateStarted}</span>` : ""}
+      ${book.dateFinished ? `<span>Finished: ${book.dateFinished}</span>` : ""}
+    </div>
+
+    <div class="card-actions">
+      <button class="edit-btn">Edit</button>
+      <button class="delete-btn">Delete</button>
     </div>
   `;
 
@@ -136,6 +192,7 @@ function closeModal() {
   editingBookId = null;
   selectedRating = null;
   stars.forEach(s => s.classList.remove("active"));
+  enforceStatusRules();
 }
 
 bookForm.addEventListener("submit", e => {
@@ -143,15 +200,25 @@ bookForm.addEventListener("submit", e => {
 
   const books = getBooks();
 
+  let finalStatus = statusSelect.value;
+
+  if (dateFinished.value) {
+    finalStatus = "read";
+  } else if (selectedRating) {
+    finalStatus = "read";
+  } else if (dateStarted.value) {
+    finalStatus = "currently";
+  }
+
   if (editingBookId) {
     // EDIT
     const book = books.find(b => b.id === editingBookId);
 
     book.title = title.value.trim();
     book.author = author.value.trim();
-    book.status = status.value;
+    book.status = finalStatus;
     book.format = format.value;
-    book.rating = rating.value ? Number(rating.value) : null;
+    book.rating = selectedRating;
     book.notes = notes.value;
     book.cover = cover.value || null;
     book.dateStarted = dateStarted.value || null;
@@ -164,7 +231,7 @@ bookForm.addEventListener("submit", e => {
       id: crypto.randomUUID(),
       title: title.value.trim(),
       author: author.value.trim(),
-      status: status.value,
+      status: finalStatus,
       format: format.value,
       rating: selectedRating,
       notes: notes.value,
@@ -184,14 +251,16 @@ function openEditModal(book) {
 
   title.value = book.title;
   author.value = book.author;
-  status.value = book.status;
+  statusSelect.value = book.status;
   format.value = book.format;
-  rating.value = book.rating ?? "";
+  selectedRating = book.rating;
+
   notes.value = book.notes;
   cover.value = book.cover ?? "";
   dateStarted.value = book.dateStarted ?? "";
   dateFinished.value = book.dateFinished ?? "";
 
+  enforceStatusRules();
   modal.classList.remove("hidden");
 }
 
