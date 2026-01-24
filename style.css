@@ -145,12 +145,12 @@ main {
   cursor: pointer;
 }
 
-#resetBtn {
-  background: #444;
+#addBookBtn:hover {
+  background: #2f2f2f;
 }
 
 #resetBtn:hover {
-  background: #222;
+  background: #2f2f2f;
 }
 
 /* ===== Star Rating ===== */
