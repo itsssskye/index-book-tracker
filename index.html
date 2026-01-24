@@ -12,8 +12,10 @@
   <header>
     <h1>Index</h1>
     <p class="tagline">Track what you read</p>
-    <button id="addBookBtn">+ Add Book</button>
-    <button id="resetBtn">Reset</button>    
+    <div class="header-actions">
+      <button id="addBookBtn">+ Add Book</button>
+      <button id="resetBtn">Reset</button>
+    </div> 
   </header>
 
   <!-- Tabs -->
@@ -26,15 +28,15 @@
 
   <!-- Main content -->
   <main>
-    <section id="currently" class="tab-content active"></section>
-    <section id="want_read" class="tab-content"></section>
-    <section id="read" class="tab-content"></section>
-    <section id="want_buy" class="tab-content"></section>
+    <section id="currently" class="tab-content book-grid active"></section>
+    <section id="want_read" class="tab-content book-grid"></section>
+    <section id="read" class="tab-content book-grid"></section>
+    <section id="want_buy" class="tab-content book-grid"></section>
   </main>
 
   <!-- Add / Edit Book Modal -->
   <div id="bookModal" class="modal hidden">
-    <form id="bookForm">
+    <form id="bookForm" class="modal-content">
       <h2>Add Book</h2>
 
       <label>
@@ -77,7 +79,13 @@
 
       <label>
         Rating
-        <input type="number" min="1" max="5" id="rating" />
+        <div class="star-rating" id="rating">
+            <span data-value="1">★</span>
+            <span data-value="2">★</span>
+            <span data-value="3">★</span>
+            <span data-value="4">★</span>
+            <span data-value="5">★</span>
+        </div>
       </label>
 
       <label>
@@ -90,7 +98,7 @@
         <input type="url" id="cover" />
       </label>
 
-      <div class="actions">
+      <div class="form-actions">
         <button type="submit">Save</button>
         <button type="button" id="cancelBtn">Cancel</button>
       </div>

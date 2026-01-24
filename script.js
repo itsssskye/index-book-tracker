@@ -1,5 +1,3 @@
-let editingBookId = null;
-
 // ===== FORM INPUTS =====
 const title = document.getElementById("title");
 const author = document.getElementById("author");
@@ -10,6 +8,21 @@ const notes = document.getElementById("notes");
 const cover = document.getElementById("cover");
 const dateStarted = document.getElementById("dateStarted");
 const dateFinished = document.getElementById("dateFinished");
+
+let editingBookId = null;
+
+let selectedRating = null;
+
+const stars = document.querySelectorAll(".star-rating span");
+
+stars.forEach(star => {
+  star.addEventListener("click", () => {
+    selectedRating = Number(star.dataset.value);
+    stars.forEach(s =>
+      s.classList.toggle("active", Number(s.dataset.value) <= selectedRating)
+    );
+  });
+});
 
 // ===== STORAGE HELPERS =====
 function getBooks() {
@@ -54,14 +67,13 @@ function createBookCard(book) {
   card.className = "book-card";
 
   card.innerHTML = `
-    <strong>${book.title}</strong><br>
-    <em>${book.author}</em><br>
-    <small>${book.format}</small>
-    ${book.dateStarted ? `<br><small>Started: ${book.dateStarted}</small>` : ""}
-    ${book.dateFinished ? `<br><small>Finished: ${book.dateFinished}</small>` : ""}
-    <div class="card-actions">
-      <button data-id="${book.id}" class="edit-btn">Edit</button>
-      <button data-id="${book.id}" class="delete-btn">Delete</button>
+    <strong>${book.title}</strong>
+    <em>${book.author}</em>
+
+    <div class="book-meta">
+        <span>${book.format}</span>
+        ${book.dateStarted ? `<span>Started: ${book.dateStarted}</span>` : ""}
+        ${book.dateFinished ? `<span>Finished: ${book.dateFinished}</span>` : ""}
     </div>
   `;
 
@@ -105,7 +117,7 @@ const bookForm = document.getElementById("bookForm");
 const resetBtn = document.getElementById("resetBtn");
 
 resetBtn.addEventListener("click", () => {
-  const confirmReset = confirm("Clear all saved books?");
+  const confirmReset = confirm("This will delete ALL books. Are you sure?");
   if (!confirmReset) return;
 
   localStorage.removeItem("books");
@@ -122,6 +134,8 @@ function closeModal() {
   modal.classList.add("hidden");
   bookForm.reset();
   editingBookId = null;
+  selectedRating = null;
+  stars.forEach(s => s.classList.remove("active"));
 }
 
 bookForm.addEventListener("submit", e => {
@@ -152,7 +166,7 @@ bookForm.addEventListener("submit", e => {
       author: author.value.trim(),
       status: status.value,
       format: format.value,
-      rating: rating.value ? Number(rating.value) : null,
+      rating: selectedRating,
       notes: notes.value,
       cover: cover.value || null,
       dateStarted: dateStarted.value || null,

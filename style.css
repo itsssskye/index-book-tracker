@@ -1,43 +1,179 @@
-/* ===== BASIC RESET ===== */
-body {
-  font-family: system-ui, sans-serif;
+/* ===== Base Reset ===== */
+* {
+  box-sizing: border-box;
   margin: 0;
-  padding: 16px;
+  padding: 0;
 }
 
-/* ===== TABS ===== */
+:root {
+  --bg: #f5f5f5;
+  --card: #ffffff;
+  --text: #111111;
+  --muted: #666666;
+  --border: #e0e0e0;
+  --accent: #000000;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ===== Layout ===== */
+header {
+  padding: 2rem;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+header p {
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* ===== Tabs ===== */
 .tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .tab {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  background: #f5f5f5;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  background: transparent;
   cursor: pointer;
+  border-radius: 6px;
+  color: var(--muted);
 }
 
 .tab.active {
-  background: #e0e0e0;
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* ===== Book Grid ===== */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+/* ===== Book Card ===== */
+.book-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.book-card strong {
+  font-size: 1rem;
   font-weight: 600;
 }
 
-/* ===== TAB CONTENT ===== */
-.tab-content {
-  display: none;
+.book-card em {
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
-.tab-content.active {
-  display: block;
+.book-meta {
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
-/* ===== MODAL ===== */
+/* ===== Card Actions ===== */
+.card-actions {
+  margin-top: 0.6rem;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.card-actions button {
+  padding: 0.35rem;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.card-actions button:hover {
+  background: #eeeeee;
+  color: var(--text);
+}
+
+/* ===== Header Actions ===== */
+.header-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+#addBookBtn,
+#resetBtn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#resetBtn {
+  background: #444;
+}
+
+#resetBtn:hover {
+  background: #222;
+}
+
+/* ===== Star Rating ===== */
+.star-rating {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.star-rating span {
+  color: #ccc;
+}
+
+.star-rating span.active {
+  color: #000;
+}
+
+/* ===== Modal ===== */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,21 +183,56 @@ body {
   display: none;
 }
 
-#bookForm {
+.modal-content {
   background: white;
-  padding: 16px;
-  max-width: 400px;
+  padding: 1.5rem;
+  border-radius: 12px;
   width: 100%;
-  border-radius: 4px;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
-}
-
-.actions {
+  max-width: 420px;
   display: flex;
-  gap: 8px;
-  margin-top: 12px;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modal-content h2 {
+  margin-bottom: 0.5rem;
+}
+
+/* ===== Form ===== */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-family: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.form-actions button[type="submit"] {
+  background: var(--accent);
+  color: white;
+}
+
+.form-actions button[type="button"] {
+  background: transparent;
+  border: 1px solid var(--border);
 }
