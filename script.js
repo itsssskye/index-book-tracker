@@ -78,6 +78,17 @@ const modal = document.getElementById("bookModal");
 const cancelBtn = document.getElementById("cancelBtn");
 const bookForm = document.getElementById("bookForm");
 
+// ===== RESET APP =====
+const resetBtn = document.getElementById("resetBtn");
+
+resetBtn.addEventListener("click", () => {
+  const confirmReset = confirm("Clear all saved books?");
+  if (!confirmReset) return;
+
+  localStorage.removeItem("books");
+  renderBooks();
+});
+
 addBookBtn.addEventListener("click", () => {
   modal.classList.remove("hidden");
 });
