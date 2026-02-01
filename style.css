@@ -187,48 +187,6 @@ main {
   background: #2f2f2f;
 }
 
-/* ===== Star Rating ===== */
-.star-rating {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.star-rating span {
-  font-size: 1.5rem;
-  color: #ccc;
-  cursor: pointer;
-  user-select: none;
-  transition: color 0.15s ease, transform 0.15s ease;
-}
-
-.star-rating span.active {
-  color: #000;
-}
-
-.star-rating span:hover {
-  transform: scale(1.15);
-}
-
-.card-rating {
-  font-size: 0.9rem;
-  color: #000;
-}
-
-#clearRating {
-  background: none;
-  border: none;
-  color: #777;
-  font-size: 0.75rem;
-  cursor: pointer;
-  padding: 0;
-}
-
-#clearRating:hover {
-  text-decoration: underline;
-  color: #444;
-}
-
 /* ===== Modal ===== */
 .modal {
   position: fixed;

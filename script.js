@@ -9,9 +9,7 @@ const dateStarted = document.getElementById("dateStarted");
 const dateFinished = document.getElementById("dateFinished");
 
 let editingBookId = null;
-let selectedRating = null;
 
-const stars = document.querySelectorAll(".star-rating span");
 const today = new Date().toISOString().split("T")[0];
 dateStarted.max = today;
 dateFinished.max = today;
@@ -32,25 +30,6 @@ dateFinished.addEventListener("input", enforceStatusRules);
 statusSelect.addEventListener("change", enforceStatusRules);
 statusSelect.addEventListener("input", enforceStatusRules);
 
-stars.forEach(star => {
-  star.addEventListener("click", () => {
-    selectedRating = Number(star.dataset.value);
-
-    updateStarUI(selectedRating);
-
-    // HARD LOCK status
-    statusSelect.value = "read";
-    statusSelect.disabled = true;
-  });
-});
-
-function updateStarUI(rating) {
-  stars.forEach(star => {
-    const value = Number(star.dataset.value);
-    star.classList.toggle("active", rating !== null && value <= rating);
-  });
-}
-
 function validateDates() {
   if (dateStarted.value && dateFinished.value) {
     if (dateFinished.value < dateStarted.value) {
@@ -61,14 +40,6 @@ function validateDates() {
 
   enforceStatusRules();
 }
-
-document.getElementById("clearRating").addEventListener("click", () => {
-  selectedRating = null;
-  updateStarUI(null);
-
-  statusSelect.disabled = false;
-  enforceStatusRules();
-});
 
 // ===== STORAGE HELPERS =====
 function getBooks() {
@@ -83,30 +54,17 @@ function saveBooks(books) {
 function enforceStatusRules() {
   const hasStart = !!dateStarted.value;
   const hasFinish = !!dateFinished.value;
-  const hasRating = selectedRating !== null;
 
   const options = Array.from(statusSelect.options);
 
-  // Reset
   options.forEach(o => o.disabled = false);
-  statusSelect.disabled = false;
 
-  // RATING = ABSOLUTE READ
-  if (hasRating) {
-    options.forEach(o => o.disabled = o.value !== "read");
-    statusSelect.value = "read";
-    statusSelect.disabled = true;
-    return;
-  }
-
-  // FINISHED = READ
   if (hasFinish) {
     options.forEach(o => o.disabled = o.value !== "read");
     statusSelect.value = "read";
     return;
   }
 
-  // STARTED = CURRENTLY or READ
   if (hasStart) {
     options.forEach(o => {
       if (!["currently", "read"].includes(o.value)) {
@@ -151,12 +109,6 @@ function createBookCard(book) {
   const card = document.createElement("div");
   card.className = "book-card";
 
-  const ratingStars = book.rating
-    ? `<div class="card-rating">
-        ${"★".repeat(book.rating)}${"☆".repeat(5 - book.rating)}
-        </div>`
-    : "";
-
   const MAX = 120;
   const shortNotes = book.notes && book.notes.length > MAX
     ? book.notes.slice(0, MAX) + "..."
@@ -170,7 +122,6 @@ function createBookCard(book) {
       <span>${book.format === "ebook" ? "eBook" : "Paperback"}</span>
       ${book.dateStarted ? `<span>Started: ${book.dateStarted}</span>` : ""}
       ${book.dateFinished ? `<span>Finished: ${book.dateFinished}</span>` : ""}
-      ${ratingStars}
       ${book.notes
         ? `<p class="notes">
              ${shortNotes}
@@ -268,14 +219,14 @@ bookForm.addEventListener("submit", e => {
   enforceStatusRules();
 
   const books = getBooks();
-  let finalStatus = selectedRating ? "read" : statusSelect.value;
+  let finalStatus = statusSelect.value;
 
   // Only force when invalid
   if (dateStarted.value && statusSelect.value === "want_read") {
     finalStatus = "currently";
   }
 
-  if (editingBookId) {
+  if (editingBookId !== null) {
     // EDIT
     const book = books.find(b => b.id === editingBookId);
 
@@ -283,7 +234,6 @@ bookForm.addEventListener("submit", e => {
     book.author = author.value.trim();
     book.status = finalStatus;
     book.format = format.value;
-    book.rating = selectedRating;
     book.notes = notes.value;
     book.cover = cover.value || null;
     book.dateStarted = dateStarted.value || null;
@@ -298,7 +248,6 @@ bookForm.addEventListener("submit", e => {
       author: author.value.trim(),
       status: finalStatus,
       format: format.value,
-      rating: selectedRating,
       notes: notes.value,
       cover: cover.value || null,
       dateStarted: dateStarted.value || null,
@@ -318,19 +267,11 @@ function openEditModal(book) {
   author.value = book.author;
   statusSelect.value = book.status;
   format.value = book.format;
-  selectedRating = book.rating;
 
   notes.value = book.notes;
   cover.value = book.cover ?? "";
   dateStarted.value = book.dateStarted ?? "";
   dateFinished.value = book.dateFinished ?? "";
-
-  stars.forEach(s =>
-    s.classList.toggle(
-      "active",
-      Number(s.dataset.value) <= (book.rating || 0)
-    )
-  );
 
   enforceStatusRules();
   modal.classList.remove("hidden");
