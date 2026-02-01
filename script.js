@@ -7,6 +7,7 @@ const notes = document.getElementById("notes");
 const cover = document.getElementById("cover");
 const dateStarted = document.getElementById("dateStarted");
 const dateFinished = document.getElementById("dateFinished");
+const ratingSelect = document.getElementById("rating");
 
 let editingBookId = null;
 
@@ -29,6 +30,7 @@ dateStarted.addEventListener("input", enforceStatusRules);
 dateFinished.addEventListener("input", enforceStatusRules);
 statusSelect.addEventListener("change", enforceStatusRules);
 statusSelect.addEventListener("input", enforceStatusRules);
+ratingSelect.addEventListener("change", enforceStatusRules);
 
 function validateDates() {
   if (dateStarted.value && dateFinished.value) {
@@ -39,6 +41,16 @@ function validateDates() {
   }
 
   enforceStatusRules();
+}
+
+function formatRating(value) {
+  return {
+    skip: "Skip..",
+    fine: "Fine.",
+    good: "Good",
+    great: "Great!",
+    holy: "HOLY SHIT!?!"
+  }[value];
 }
 
 // ===== STORAGE HELPERS =====
@@ -54,17 +66,29 @@ function saveBooks(books) {
 function enforceStatusRules() {
   const hasStart = !!dateStarted.value;
   const hasFinish = !!dateFinished.value;
+  const hasRating = !!ratingSelect.value;
 
   const options = Array.from(statusSelect.options);
 
+  // Reset
   options.forEach(o => o.disabled = false);
+  statusSelect.disabled = false;
 
+  // RATING = ABSOLUTE READ
+  if (hasRating) {
+    options.forEach(o => o.disabled = o.value !== "read");
+    statusSelect.value = "read";
+    return;
+  }
+
+  // FINISHED = READ
   if (hasFinish) {
     options.forEach(o => o.disabled = o.value !== "read");
     statusSelect.value = "read";
     return;
   }
 
+  // STARTED = CURRENTLY or READ
   if (hasStart) {
     options.forEach(o => {
       if (!["currently", "read"].includes(o.value)) {
@@ -122,6 +146,7 @@ function createBookCard(book) {
       <span>${book.format === "ebook" ? "eBook" : "Paperback"}</span>
       ${book.dateStarted ? `<span>Started: ${book.dateStarted}</span>` : ""}
       ${book.dateFinished ? `<span>Finished: ${book.dateFinished}</span>` : ""}
+      ${book.rating ? `<span class="rating-text">${formatRating(book.rating)}</span>` : ""}
       ${book.notes
         ? `<p class="notes">
              ${shortNotes}
@@ -216,10 +241,12 @@ function closeModal() {
 bookForm.addEventListener("submit", e => {
   e.preventDefault();
 
+  const ratingValue = ratingSelect.value || null;
+
   enforceStatusRules();
 
   const books = getBooks();
-  let finalStatus = statusSelect.value;
+  let finalStatus = ratingValue ? "read" : statusSelect.value;
 
   // Only force when invalid
   if (dateStarted.value && statusSelect.value === "want_read") {
@@ -234,6 +261,7 @@ bookForm.addEventListener("submit", e => {
     book.author = author.value.trim();
     book.status = finalStatus;
     book.format = format.value;
+    book.rating = ratingValue
     book.notes = notes.value;
     book.cover = cover.value || null;
     book.dateStarted = dateStarted.value || null;
@@ -248,6 +276,7 @@ bookForm.addEventListener("submit", e => {
       author: author.value.trim(),
       status: finalStatus,
       format: format.value,
+      rating: ratingValue,
       notes: notes.value,
       cover: cover.value || null,
       dateStarted: dateStarted.value || null,
@@ -272,6 +301,7 @@ function openEditModal(book) {
   cover.value = book.cover ?? "";
   dateStarted.value = book.dateStarted ?? "";
   dateFinished.value = book.dateFinished ?? "";
+  ratingSelect.value = book.rating || "";
 
   enforceStatusRules();
   modal.classList.remove("hidden");
