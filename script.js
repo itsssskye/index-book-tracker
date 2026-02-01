@@ -4,7 +4,6 @@ const author = document.getElementById("author");
 const statusSelect = document.getElementById("status");
 const format = document.getElementById("format");
 const notes = document.getElementById("notes");
-const cover = document.getElementById("cover");
 const dateStarted = document.getElementById("dateStarted");
 const dateFinished = document.getElementById("dateFinished");
 const ratingSelect = document.getElementById("rating");
@@ -263,7 +262,6 @@ bookForm.addEventListener("submit", e => {
     book.format = format.value;
     book.rating = ratingValue
     book.notes = notes.value;
-    book.cover = cover.value || null;
     book.dateStarted = dateStarted.value || null;
     book.dateFinished = dateFinished.value || null;
 
@@ -278,7 +276,6 @@ bookForm.addEventListener("submit", e => {
       format: format.value,
       rating: ratingValue,
       notes: notes.value,
-      cover: cover.value || null,
       dateStarted: dateStarted.value || null,
       dateFinished: dateFinished.value || null
     });
@@ -298,7 +295,6 @@ function openEditModal(book) {
   format.value = book.format;
 
   notes.value = book.notes;
-  cover.value = book.cover ?? "";
   dateStarted.value = book.dateStarted ?? "";
   dateFinished.value = book.dateFinished ?? "";
   ratingSelect.value = book.rating || "";
