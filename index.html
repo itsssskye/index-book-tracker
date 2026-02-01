@@ -28,10 +28,10 @@
 
   <!-- Main content -->
   <main>
-    <section id="currently" class="tab-content book-grid active"></section>
-    <section id="want_read" class="tab-content book-grid"></section>
-    <section id="read" class="tab-content book-grid"></section>
-    <section id="want_buy" class="tab-content book-grid"></section>
+    <section id="currently" class="tab-content active"></section>
+    <section id="want_read" class="tab-content"></section>
+    <section id="read" class="tab-content"></section>
+    <section id="want_buy" class="tab-content"></section>
   </main>
 
   <!-- Add / Edit Book Modal -->
@@ -79,12 +79,13 @@
 
       <label>
         Rating
-        <div class="star-rating" id="rating">
-            <span data-value="1">★</span>
-            <span data-value="2">★</span>
-            <span data-value="3">★</span>
-            <span data-value="4">★</span>
-            <span data-value="5">★</span>
+        <div class="star-rating">
+          <span data-value="1">★</span>
+          <span data-value="2">★</span>
+          <span data-value="3">★</span>
+          <span data-value="4">★</span>
+          <span data-value="5">★</span>
+          <button type="button" id="clearRating">Clear</button>
         </div>
       </label>
 
@@ -104,6 +105,26 @@
       </div>
     </form>
   </div>
+
+  <div id="noteModal" class="modal hidden notes-modal">
+    <div class="modal-content">
+        <h3>Notes</h3>
+        <p id="fullNoteText"></p>
+        <button id="closeNoteBtn" class="close-btn">×</button>
+    </div>
+  </div>
+
+  <div id="resetModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>Reset Library?</h3>
+    <p>This will permanently delete all books.</p>
+
+    <div class="modal-actions">
+      <button id="confirmReset">Reset</button>
+      <button id="cancelReset">Cancel</button>
+    </div>
+  </div>
+</div>
 
   <script src="script.js"></script>
 </body>

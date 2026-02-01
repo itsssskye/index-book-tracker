@@ -12,25 +12,62 @@ let editingBookId = null;
 let selectedRating = null;
 
 const stars = document.querySelectorAll(".star-rating span");
+const today = new Date().toISOString().split("T")[0];
+dateStarted.max = today;
+dateFinished.max = today;
 
-// Event Listeners
-dateStarted.addEventListener("change", enforceStatusRules);
-dateFinished.addEventListener("change", enforceStatusRules);
+const noteModal = document.getElementById("noteModal");
+const fullNoteText = document.getElementById("fullNoteText");
+const closeNoteBtn = document.getElementById("closeNoteBtn");
+
+closeNoteBtn.addEventListener("click", () => {
+  noteModal.classList.add("hidden");
+});
+
+// ==== EVENT LISTENERS ====
+dateStarted.addEventListener("change", validateDates);
+dateFinished.addEventListener("change", validateDates);
+dateStarted.addEventListener("input", enforceStatusRules);
+dateFinished.addEventListener("input", enforceStatusRules);
 statusSelect.addEventListener("change", enforceStatusRules);
+statusSelect.addEventListener("input", enforceStatusRules);
 
 stars.forEach(star => {
-    star.addEventListener("click", () => {
-        selectedRating = Number(star.dataset.value);
+  star.addEventListener("click", () => {
+    selectedRating = Number(star.dataset.value);
 
-        stars.forEach(s =>
-        s.classList.toggle(
-            "active",
-            Number(s.dataset.value) <= selectedRating
-           )
-        );
+    updateStarUI(selectedRating);
 
-        enforceStatusRules();
-    });
+    // HARD LOCK status
+    statusSelect.value = "read";
+    statusSelect.disabled = true;
+  });
+});
+
+function updateStarUI(rating) {
+  stars.forEach(star => {
+    const value = Number(star.dataset.value);
+    star.classList.toggle("active", rating !== null && value <= rating);
+  });
+}
+
+function validateDates() {
+  if (dateStarted.value && dateFinished.value) {
+    if (dateFinished.value < dateStarted.value) {
+      alert("Finished date cannot be before start date.");
+      dateFinished.value = "";
+    }
+  }
+
+  enforceStatusRules();
+}
+
+document.getElementById("clearRating").addEventListener("click", () => {
+  selectedRating = null;
+  updateStarUI(null);
+
+  statusSelect.disabled = false;
+  enforceStatusRules();
 });
 
 // ===== STORAGE HELPERS =====
@@ -44,44 +81,43 @@ function saveBooks(books) {
 
 // ==== STATUS HELPERS ====
 function enforceStatusRules() {
+  const hasStart = !!dateStarted.value;
+  const hasFinish = !!dateFinished.value;
+  const hasRating = selectedRating !== null;
+
   const options = Array.from(statusSelect.options);
 
-  // Reset: enable everything
-  options.forEach(opt => (opt.disabled = false));
+  // Reset
+  options.forEach(o => o.disabled = false);
+  statusSelect.disabled = false;
 
-  // Finished date → READ ONLY
-  if (dateFinished.value) {
-    options.forEach(opt => {
-      if (opt.value !== "read") opt.disabled = true;
-    });
+  // RATING = ABSOLUTE READ
+  if (hasRating) {
+    options.forEach(o => o.disabled = o.value !== "read");
+    statusSelect.value = "read";
+    statusSelect.disabled = true;
+    return;
+  }
+
+  // FINISHED = READ
+  if (hasFinish) {
+    options.forEach(o => o.disabled = o.value !== "read");
     statusSelect.value = "read";
     return;
   }
 
-  // Rating exists → READ ONLY
-  if (selectedRating) {
-    options.forEach(opt => {
-      if (opt.value !== "read") opt.disabled = true;
-    });
-    statusSelect.value = "read";
-    return;
-  }
-
-  // Start date exists → CURRENTLY or READ
-  if (dateStarted.value) {
-    options.forEach(opt => {
-      if (!["currently", "read"].includes(opt.value)) {
-        opt.disabled = true;
+  // STARTED = CURRENTLY or READ
+  if (hasStart) {
+    options.forEach(o => {
+      if (!["currently", "read"].includes(o.value)) {
+        o.disabled = true;
       }
     });
 
     if (!["currently", "read"].includes(statusSelect.value)) {
       statusSelect.value = "currently";
     }
-    return;
   }
-
-  // No constraints → allow all
 }
 
 // ===== RENDERING =====
@@ -93,15 +129,13 @@ function renderBooks() {
   });
 
   books.forEach(book => {
-    const section = document.getElementById(book.status);
-
-    if (!section) {
-      console.error("No section found for status:", book.status);
-      return;
+    if (!document.getElementById(book.status)) {
+      console.warn("Invalid status fixed:", book.status);
+      book.status = "want_read";
     }
 
-    const card = createBookCard(book);
-    section.appendChild(card);
+    const section = document.getElementById(book.status);
+    section.appendChild(createBookCard(book));
   });
 }
 
@@ -117,14 +151,33 @@ function createBookCard(book) {
   const card = document.createElement("div");
   card.className = "book-card";
 
+  const ratingStars = book.rating
+    ? `<div class="card-rating">
+        ${"★".repeat(book.rating)}${"☆".repeat(5 - book.rating)}
+        </div>`
+    : "";
+
+  const MAX = 120;
+  const shortNotes = book.notes && book.notes.length > MAX
+    ? book.notes.slice(0, MAX) + "..."
+    : book.notes || "";
+
   card.innerHTML = `
     <strong>${book.title}</strong>
     <em>${book.author}</em>
 
     <div class="book-meta">
-      <span>${book.format}</span>
+      <span>${book.format === "ebook" ? "eBook" : "Paperback"}</span>
       ${book.dateStarted ? `<span>Started: ${book.dateStarted}</span>` : ""}
       ${book.dateFinished ? `<span>Finished: ${book.dateFinished}</span>` : ""}
+      ${ratingStars}
+      ${book.notes
+        ? `<p class="notes">
+             ${shortNotes}
+             ${book.notes.length > MAX ? `<button class="read-more" type="button">Read more</button>` : ""}
+           </p>`
+        : ""
+      }
     </div>
 
     <div class="card-actions">
@@ -143,8 +196,14 @@ function createBookCard(book) {
     deleteBook(book.id);
   });
 
+  // Read More
+  card.querySelector(".read-more")?.addEventListener("click", () => {
+    fullNoteText.textContent = book.notes;
+    noteModal.classList.remove("hidden");
+  });
+
   return card;
-}
+};
 
 // ===== TAB SWITCHING =====
 const tabs = document.querySelectorAll(".tab");
@@ -170,14 +229,22 @@ const cancelBtn = document.getElementById("cancelBtn");
 const bookForm = document.getElementById("bookForm");
 
 // ===== RESET APP =====
-const resetBtn = document.getElementById("resetBtn");
+const resetModal = document.getElementById("resetModal");
+const confirmResetBtn = document.getElementById("confirmReset");
+const cancelResetBtn = document.getElementById("cancelReset");
 
 resetBtn.addEventListener("click", () => {
-  const confirmReset = confirm("This will delete ALL books. Are you sure?");
-  if (!confirmReset) return;
+  resetModal.classList.remove("hidden");
+});
 
+cancelResetBtn.addEventListener("click", () => {
+  resetModal.classList.add("hidden");
+});
+
+confirmResetBtn.addEventListener("click", () => {
   localStorage.removeItem("books");
   renderBooks();
+  resetModal.classList.add("hidden");
 });
 
 addBookBtn.addEventListener("click", () => {
@@ -198,15 +265,13 @@ function closeModal() {
 bookForm.addEventListener("submit", e => {
   e.preventDefault();
 
+  enforceStatusRules();
+
   const books = getBooks();
+  let finalStatus = selectedRating ? "read" : statusSelect.value;
 
-  let finalStatus = statusSelect.value;
-
-  if (dateFinished.value) {
-    finalStatus = "read";
-  } else if (selectedRating) {
-    finalStatus = "read";
-  } else if (dateStarted.value) {
+  // Only force when invalid
+  if (dateStarted.value && statusSelect.value === "want_read") {
     finalStatus = "currently";
   }
 
@@ -227,8 +292,8 @@ bookForm.addEventListener("submit", e => {
     editingBookId = null;
   } else {
     // ADD
-    books.push({
-      id: crypto.randomUUID(),
+    books.unshift({
+      id: Date.now().toString(),
       title: title.value.trim(),
       author: author.value.trim(),
       status: finalStatus,
@@ -259,6 +324,13 @@ function openEditModal(book) {
   cover.value = book.cover ?? "";
   dateStarted.value = book.dateStarted ?? "";
   dateFinished.value = book.dateFinished ?? "";
+
+  stars.forEach(s =>
+    s.classList.toggle(
+      "active",
+      Number(s.dataset.value) <= (book.rating || 0)
+    )
+  );
 
   enforceStatusRules();
   modal.classList.remove("hidden");
