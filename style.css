@@ -12,6 +12,7 @@
   --muted: #666666;
   --border: #e0e0e0;
   --accent: #000000;
+  --danger: #ff5c5c;
 }
 
 body {
@@ -187,6 +188,23 @@ main {
   background: #2f2f2f;
 }
 
+#exportBtn,
+#importBtn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+#exportBtn:hover,
+#importBtn:hover {
+  background: #eee;
+}
+
 /* ===== Modal ===== */
 .modal {
   position: fixed;
@@ -269,6 +287,21 @@ main {
 
 #cancelReset:hover {
     background: #ddd;
+}
+
+#infoModal .modal-content {
+  max-width: 360px;
+}
+
+#infoOkBtn {
+  background: var(--accent);
+  color: white;
+  border-radius: 6px;
+  padding: 6px 14px;
+}
+
+#infoOkBtn:hover {
+  background: #2f2f2f;
 }
 
 /* ===== Form ===== */

@@ -15,6 +15,9 @@
     <div class="header-actions">
       <button id="addBookBtn">+ Add Book</button>
       <button id="resetBtn">Reset</button>
+      <button id="exportBtn">Export</button>
+      <button id="importBtn">Import</button>
+      <input type="file" id="importFile" accept=".json" hidden />
     </div> 
   </header>
 
@@ -117,6 +120,17 @@
     <div class="modal-actions">
       <button id="confirmReset">Reset</button>
       <button id="cancelReset">Cancel</button>
+    </div>
+  </div>
+</div>
+
+  <div id="infoModal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="infoTitle">Info</h3>
+    <p id="infoMessage"></p>
+
+    <div class="modal-actions">
+      <button id="infoOkBtn">Ok</button>
     </div>
   </div>
 </div>

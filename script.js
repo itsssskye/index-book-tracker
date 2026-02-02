@@ -52,6 +52,82 @@ function formatRating(value) {
   }[value];
 }
 
+// ==== IMPORT/EXPORT ====
+const exportBtn = document.getElementById("exportBtn");
+
+exportBtn.addEventListener("click", () => {
+  const data = {
+    version: 1,
+    created: new Date().toISOString(),
+    books: getBooks()
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `index-library-${Date.now()}.json`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
+
+const importBtn = document.getElementById("importBtn");
+const importFile = document.getElementById("importFile");
+
+importBtn.addEventListener("click", () => {
+  importFile.click();
+});
+
+importFile.addEventListener("change", () => {
+  const file = importFile.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+
+      if (!Array.isArray(data.books)) {
+        alert("Invalid library file.");
+        return;
+      }
+
+      saveBooks(data.books);
+      renderBooks();
+      openInfoModal(
+        "Library restored!",
+        "Your library was successfully imported."
+      );
+    } catch {
+      alert("Failed to read file.");
+    }
+  };
+
+  reader.readAsText(file);
+});
+
+const infoModal = document.getElementById("infoModal");
+const infoTitle = document.getElementById("infoTitle");
+const infoMessage = document.getElementById("infoMessage");
+const infoOkBtn = document.getElementById("infoOkBtn");
+
+function openInfoModal(title, message) {
+  infoTitle.textContent = title;
+  infoMessage.textContent = message;
+  infoModal.classList.remove("hidden");
+}
+
+infoOkBtn.addEventListener("click", () => {
+  infoModal.classList.add("hidden");
+});
+
 // ===== STORAGE HELPERS =====
 function getBooks() {
   return JSON.parse(localStorage.getItem("books")) || [];
@@ -220,6 +296,25 @@ confirmResetBtn.addEventListener("click", () => {
   localStorage.removeItem("books");
   renderBooks();
   resetModal.classList.add("hidden");
+
+  // optional auto-export
+  const empty = {
+    version: 1,
+    created: new Date().toISOString(),
+    books: []
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(empty, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "index-library-empty.json";
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 addBookBtn.addEventListener("click", () => {
